@@ -3,10 +3,13 @@ Description: ec2Instance
 
 Parameters:
   KeyPair:
-    Description: The EC2 Key Pair to allow SSH access to the instance
+    Description: The EC2 Key Pair to allow SSM access to the instance
     Type: "AWS::EC2::KeyPair::KeyName"
+  AvailabilityZone:
+    Type: String
+    Default: ap-northeast-1a
   Ec2ImageId:
-    Type: AWS::SSM::Parameter::Value<String>
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
 #    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
     Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2
   InstanceType:
@@ -48,7 +51,7 @@ Resources:
   Subnet:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: ap-northeast-1a
+      AvailabilityZone: !Ref AvailabilityZone
       VpcId: !Ref VPC
       CidrBlock: !Select [ 0, !Cidr [ !GetAtt VPC.CidrBlock, 1, 8]]
       Tags:
@@ -147,12 +150,12 @@ Resources:
           Value: !Sub ${InstanceName}
         - Key: hostname
           Value: prd
-      AvailabilityZone: ap-northeast-1a
+      AvailabilityZone: !Ref AvailabilityZone
       ImageId: !Ref Ec2ImageId
       InstanceType: !Ref InstanceType
       KeyName: !Ref KeyPair
       NetworkInterfaces:
-        - AssociatePublicIpAddress: "true"
+        - AssociatePublicIpAddress: true
           DeviceIndex: "0"
           SubnetId: !Ref Subnet
           GroupSet:

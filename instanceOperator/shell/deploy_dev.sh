@@ -1,6 +1,6 @@
 #!/bin/bash
 
-instanceid=`cat env/dev/instanceid.txt`
+instanceid=$(cat env/dev/instanceid.txt)
 
 if [ -z $instanceid ]; then
     echo "インスタンスIDを指定してください"
@@ -8,21 +8,21 @@ if [ -z $instanceid ]; then
 fi
 echo "インスタンスID："$instanceid
 
-hostzoneid=`cat env/dev/hostzoneid.txt`
+hostzoneid=$(cat env/dev/hostzoneid.txt)
 if [ -z $hostzoneid ]; then
     echo "ホストゾーンIDを指定してください"
     exit 1
 fi
 echo "ホストゾーンID："$hostzoneid
 
-domainname=`cat env/dev/domainname.txt`
+domainname=$(cat env/dev/domainname.txt)
 if [ -z $domainname ]; then
     echo "ドメインネームを指定してください"
     exit 1
 fi
 echo "ドメインネーム："$domainname
 
-webhookurl=`cat env/dev/webhookurl.txt`
+webhookurl=$(cat env/dev/webhookurl.txt)
 if [ -z $webhookurl ]; then
     echo "webhookurlを指定してください"
     exit 1
