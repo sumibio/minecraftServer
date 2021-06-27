@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: ec2Instans
+Description: ec2Instance
 
 Parameters:
   KeyPair:
@@ -13,8 +13,7 @@ Parameters:
     Description: Input an Instance type.
     Type: String
 #    Default: t2.micro
-#    Default: m6g.medium
-    Default: t4g.medium
+    Default: m6g.medium
   InstanceName:
     Description: Input a instance name.
     Type: String
@@ -136,12 +135,11 @@ Resources:
           sudo yum install -y java-16-amazon-corretto-devel
           sudo yum install -y jq
           aws s3 cp s3://${UserDataBucket}/shell/ /home/ec2-user/ --recursive
-          bash /home/ec2-user/init_server.sh
         - {
           UserDataBucket: !Ref UserDataBucket
           }
-      CreditSpecification:
-        CPUCredits: standard
+#      CreditSpecification:
+#        CPUCredits: standard
       IamInstanceProfile:
         !Ref InstanceProfile
       Tags:

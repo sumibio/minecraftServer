@@ -25,7 +25,7 @@ plugins:
   - serverless-python-requirements
 
 functions:
-  set_route53_record:
+  setRoute53Record:
     handler: handler/set_route53_record.lambda_handler
     timeout: 60
     role: setRoute53Role
@@ -45,13 +45,13 @@ functions:
                 - running
                 - stopping
               instance-id:
-                - ${env:INSTANSID}
+                - ${env:INSTANCEID}
   ec2Operator:
-    handler: handler/ec2Operator.lambda_handler
-    timeout: 60
+    handler: handler/ec2_operator.lambda_handler
+    timeout: 30
     role: ec2OperatorRole
     environment:
-      INSTANSID: ${env:INSTANSID}
+      INSTANCEID: ${env:INSTANCEID}
     events:
       - http:
           path: api/discord

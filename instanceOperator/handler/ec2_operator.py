@@ -3,7 +3,7 @@ import json
 import boto3
 
 REGION = 'ap-northeast-1'
-INSTANCE_ID = os.environ.get('INSTANSID')
+INSTANCE_ID = os.environ.get('INSTANCEID')
 
 
 def status_checker(describe_instances: dict) -> str:
@@ -15,16 +15,16 @@ def status_checker(describe_instances: dict) -> str:
     return state
 
 
-def start(instans_id: str) -> int:
+def start(instasce_id: str) -> int:
     try:
         ec2_client = boto3.client('ec2', region_name=REGION)
-        describe_instances = ec2_client.describe_instances(InstanceIds=[instans_id])
+        describe_instances = ec2_client.describe_instances(InstanceIds=[instasce_id])
         print(describe_instances)
         if status_checker(describe_instances) == 'stopped':
-            ec2_client.start_instances(InstanceIds=[instans_id])
-            print('instans start')
+            ec2_client.start_instances(InstanceIds=[instasce_id])
+            print('instance start')
         else:
-            print('instans not stopped')
+            print('instance not stopped')
             return 1
     except Exception as e:
         print(e)
@@ -32,15 +32,15 @@ def start(instans_id: str) -> int:
     return 0
 
 
-def stop(instans_id: str) -> int:
+def stop(instance_id: str) -> int:
     try:
         ec2_client = boto3.client('ec2', region_name=REGION)
-        describe_instances = ec2_client.describe_instances(InstanceIds=[instans_id])
+        describe_instances = ec2_client.describe_instances(InstanceIds=[instance_id])
         if status_checker(describe_instances) == 'running':
-            ec2_client.stop_instances(InstanceIds=[instans_id])
-            print('instans start')
+            ec2_client.stop_instances(InstanceIds=[instance_id])
+            print('instance start')
         else:
-            print('instans not running')
+            print('instance not running')
             return 1
     except Exception as e:
         print(e)
@@ -55,7 +55,7 @@ def lambda_handler(event, context):
         res = start(INSTANCE_ID)
         if res == 0:
             status = 200
-            message = 'インスタンスを起動処理を開始しました。'
+            message = 'インスタンス起動処理を開始しました。'
         elif res == 1:
             status = 201
             message = 'インスタンスが停止していません。'
@@ -67,7 +67,7 @@ def lambda_handler(event, context):
         res = stop(INSTANCE_ID)
         if res == 0:
             status = 200
-            message = 'インスタンスを停止処理を開始しました。'
+            message = 'インスタンス停止処理を開始しました。'
         elif res == 1:
             status = 201
             message = 'インスタンスが起動していません。'

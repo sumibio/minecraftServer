@@ -1,12 +1,12 @@
 #!/bin/bash
 
-instansid=`cat env/prd/instansid.txt`
+instanceid=`cat env/prd/instanceid.txt`
 
-if [ -z $instansid ]; then
+if [ -z $instanceid ]; then
     echo "インスタンスIDを指定してください"
     exit 1
 fi
-echo "インスタンスID："$instansid
+echo "インスタンスID："$instanceid
 
 hostzoneid=`cat env/prd/hostzoneid.txt`
 if [ -z $hostzoneid ]; then
@@ -37,7 +37,7 @@ case $ANSWER in "Yes")
     export WEBHOOKURL=$webhookurl
     export DOMAINNAME=$domainname
     export HOSTZONEID=$hostzoneid
-    export INSTANSID=$instansid
+    export INSTANCEID=$instanceid
     serverless deploy
     ;;
     * ) echo "デプロイは実施しません。"

@@ -3,7 +3,7 @@ cd ../
 export STAGE="prd"
 export DOMAINNAME="dummy"
 export HOSTZONEID="dummy"
-export INSTANSID="dummy"
+export INSTANCEID="dummy"
 export WEBHOOKURL="dummy"
 
 read -p "アンデプロイを実施しますか？: " ANSWER
