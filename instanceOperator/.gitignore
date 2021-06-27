@@ -1,0 +1,5 @@
+#deploy
+shell/env/*/hostzoneid.txt
+shell/env/*/instansid.txt
+shell/env/*/domainname.txt
+shell/env/*/webhookurl.txt

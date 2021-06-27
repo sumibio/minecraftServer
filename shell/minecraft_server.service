@@ -1,0 +1,18 @@
+[Unit]
+Description=Minecraft Server
+After=network-online.target
+
+[Service]
+User=ec2-user
+Group=ec2-user
+
+WorkingDirectory=/home/ec2-user/minecraft
+ExecStart=/bin/bash /home/ec2-user/minecraft/start_server.sh
+ExecStop=/bin/bash /home/ec2-user/minecraft/stop_server.sh
+KillMode=none
+
+Restart=on-failure
+RestartSec=60s
+
+[Install]
+WantedBy=multi-user.target

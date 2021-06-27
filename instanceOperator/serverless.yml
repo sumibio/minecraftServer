@@ -1,0 +1,108 @@
+service: instanceOperator
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: python3.8
+  stage: ${env:STAGE, 'dev'}
+  lambdaHashingVersion: 20201221
+  region: ap-northeast-1
+  memorySize: 128
+  logRetentionInDays: 3
+  apiGateway:
+    apiKeys:
+      - discord
+    usagePlan:
+      quota:
+        limit: 1000
+        offset: 0
+        period: DAY
+      throttle:
+        rateLimit: 2
+        burstLimit: 1
+
+plugins:
+  - serverless-python-requirements
+
+functions:
+  set_route53_record:
+    handler: handler/set_route53_record.lambda_handler
+    timeout: 60
+    role: setRoute53Role
+    environment:
+      DOMAINNAME: ${env:DOMAINNAME}
+      HOSTEDZONEID: ${env:HOSTZONEID}
+      WEBHOOKURL: ${env:WEBHOOKURL}
+    events:
+      - cloudwatchEvent:
+          event:
+            source:
+              - "aws.ec2"
+            detail-type:
+              - "EC2 Instance State-change Notification"
+            detail:
+              state:
+                - running
+                - stopping
+              instance-id:
+                - ${env:INSTANSID}
+  ec2Operator:
+    handler: handler/ec2Operator.lambda_handler
+    timeout: 60
+    role: ec2OperatorRole
+    environment:
+      INSTANSID: ${env:INSTANSID}
+    events:
+      - http:
+          path: api/discord
+          cors: true
+          method: get
+          private: true
+
+resources:
+  Resources:
+    setRoute53Role:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: "/instanceoperator/"
+        RoleName: ${self:service}-lambdarole-route53-${self:provider.stage}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonRoute53FullAccess
+          - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    ec2OperatorRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: "/instanceoperator/"
+        RoleName: ${self:service}-lambdarole-lambda53Role-${self:provider.stage}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+
+package:
+  patterns:
+    - '!.git/**'
+    - '!node_modules'
+    - '!node_modules/**'
+    - '!__pycache__'
+    - '!shell/**'

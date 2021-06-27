@@ -1,0 +1,173 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: ec2Instans
+
+Parameters:
+  KeyPair:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: "AWS::EC2::KeyPair::KeyName"
+  Ec2ImageId:
+    Type: AWS::SSM::Parameter::Value<String>
+#    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-arm64-gp2
+  InstanceType:
+    Description: Input an Instance type.
+    Type: String
+#    Default: t2.micro
+#    Default: m6g.medium
+    Default: t4g.medium
+  InstanceName:
+    Description: Input a instance name.
+    Type: String
+    Default: MinecraftServer
+  CidrBlock:
+    Description: Please type the CidrBlock.
+    Type: String
+    Default: 192.168.0.0/16
+  UserDataBucket:
+    Description: Bucket with initial setup script
+    Type: String
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Sub ${CidrBlock}
+      Tags:
+        - Key: Name
+          Value: !Sub VPC_${InstanceName}
+  IGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub IGW_${InstanceName}
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref IGW
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: ap-northeast-1a
+      VpcId: !Ref VPC
+      CidrBlock: !Select [ 0, !Cidr [ !GetAtt VPC.CidrBlock, 1, 8]]
+      Tags:
+        - Key: Name
+          Value: !Sub subnet_${InstanceName}
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub route_${InstanceName}
+  S3Endpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: "*"
+            Resource:
+              - '*'
+      RouteTableIds:
+        - !Ref RouteTable
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+      VpcId: !Ref VPC
+  SubnetToInternet:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW
+  SubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnet
+      RouteTableId: !Ref RouteTable
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow ssh and 25565 to client host
+      Tags:
+        - Key: Name
+          Value: !Sub sg_${InstanceName}
+      GroupName: !Sub sg_${InstanceName}
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 25565
+          ToPort: 25565
+          CidrIp: 0.0.0.0/0
+  Ec2InstanceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - !Ref Ec2InstanceRole
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      UserData:
+        Fn::Base64: !Sub
+        - |
+          #!/bin/bash
+          sudo rpm --import https://yum.corretto.aws/corretto.key
+          sudo curl -L -o /etc/yum.repos.d/corretto.repo https://yum.corretto.aws/corretto.repo
+          sudo yum install -y java-16-amazon-corretto-devel
+          sudo yum install -y jq
+          aws s3 cp s3://${UserDataBucket}/shell/ /home/ec2-user/ --recursive
+          bash /home/ec2-user/init_server.sh
+        - {
+          UserDataBucket: !Ref UserDataBucket
+          }
+      CreditSpecification:
+        CPUCredits: standard
+      IamInstanceProfile:
+        !Ref InstanceProfile
+      Tags:
+        - Key: Name
+          Value: !Sub ${InstanceName}
+        - Key: hostname
+          Value: prd
+      AvailabilityZone: ap-northeast-1a
+      ImageId: !Ref Ec2ImageId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPair
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          SubnetId: !Ref Subnet
+          GroupSet:
+            - !Ref SecurityGroup
+      BlockDeviceMappings:
+      - DeviceName: /dev/xvda
+        Ebs:
+          VolumeSize: 8
+          VolumeType: gp3
+          Iops: 3000
+          DeleteOnTermination: true
+
+Outputs:
+  OutputsInstanceId:
+    Description: EC2 Instance ID
+    Value: !Ref EC2Instance
