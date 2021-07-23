@@ -1,0 +1,64 @@
+service: billingAmountNotification
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: python3.8
+  stage: ${env:STAGE, 'dev'}
+  lambdaHashingVersion: 20201221
+  region: ap-northeast-1
+  memorySize: 128
+  logRetentionInDays: 3
+  environment:
+    WEBHOOK_URL: ${env:WEBHOOK_URL}
+    AVATAR_URL: ${env:AVATAR_URL}
+
+plugins:
+  - serverless-python-requirements
+functions:
+  billingAmountNotification:
+    handler: handler/app.lambda_handler
+    timeout: 30
+    role: billingAmountNotificationRole
+    events:
+      - schedule: cron(0 0 ? * SAT *)
+
+resources:
+  Resources:
+    billingAmountNotificationRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: "/billingAmountNotification/"
+        RoleName: ${self:service}-billingAmountNotification-${self:provider.stage}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          -
+            PolicyName: ${self:service}-billingAmountNotification-${self:provider.stage}Policy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - ce:GetCostAndUsage
+                  Resource: "*"
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+
+package:
+  patterns:
+    - '!.git/**'
+    - '!node_modules'
+    - '!node_modules/**'
+    - '!__pycache__'
+    - '!shell/**'

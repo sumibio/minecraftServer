@@ -1,10 +1,11 @@
 #!/bin/bash
 cd ../
 export STAGE="prd"
-export DOMAINNAME="dummy"
-export HOSTZONEID="dummy"
-export INSTANCEID="dummy"
-export WEBHOOKURL="dummy"
+export DOMAIN_NAME="dummy"
+export HOSTZONE_ID="dummy"
+export INSTANCE_ID="dummy"
+export WEBHOOK_URL="dummy"
+export AVATAR_URL="dummy"
 
 read -p "アンデプロイを実施しますか？: " ANSWER
 

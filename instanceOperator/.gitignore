@@ -1,5 +1,2 @@
 #deploy
-shell/env/*/hostzoneid.txt
-shell/env/*/instanceid.txt
-shell/env/*/domainname.txt
-shell/env/*/webhookurl.txt
+shell/env/.env*

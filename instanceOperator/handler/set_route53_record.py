@@ -7,13 +7,17 @@ from handler.notification_for_discord import push_message
 import boto3
 
 
+DOMAIN_NAME = os.environ.get('DOMAIN_NAME')
+HOSTEDZONE_ID = os.environ.get('HOSTEDZONE_ID')
+
+
 def json_dt(o):
     if isinstance(o, datetime):
         return o.isoformat()
 
 
 def change_record(action, host_name, host_addr):
-    domain_name = os.environ.get('DOMAINNAME')
+    domain_name = DOMAIN_NAME
     if domain_name:
         host_name = F"{host_name}.{domain_name}."
     client = boto3.client('route53')
@@ -37,7 +41,7 @@ def change_record(action, host_name, host_addr):
     }
     print("change_batch: " + json.dumps(change_batch, default=json_dt))
     response = client.change_resource_record_sets(
-        HostedZoneId=os.environ.get('HOSTEDZONEID'),
+        HostedZoneId=HOSTEDZONE_ID,
         ChangeBatch=change_batch
     )
     print("result: " + json.dumps(response, default=json_dt))

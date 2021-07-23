@@ -1,9 +1,6 @@
 #!/bin/bash
 cd ../
 export STAGE="dev"
-export DOMAIN_NAME="dummy"
-export HOSTZONE_ID="dummy"
-export INSTANCE_ID="dummy"
 export WEBHOOK_URL="dummy"
 export AVATAR_URL="dummy"
 

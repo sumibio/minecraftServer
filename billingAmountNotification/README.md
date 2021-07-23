@@ -1,14 +1,8 @@
 # 概要
-EC2インスタンスの起動停止を行う関数処理全般です。
+請求金額情報をdiscordに送信します。
 
-### handler/ec2_operator
-API GatewayをトリガーにEC2の起動停止を行います。
-
-### handler/set_route53_record.py
-EC2が起動/停止した際にRoute53のレコード削除追加を行います。
-
-### handler/notification_for_discord.py
-discordへのメッセージ通知を行います。
+以下の記事を参考にServerless Frameworkでデプロイできるようにしています。
+https://dev.classmethod.jp/articles/notify-slack-aws-billing/
 
 # 開発環境
 nodejsで動作するServerless Frameworkを使用して開発しています。

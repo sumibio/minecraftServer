@@ -11,7 +11,7 @@ provider:
   logRetentionInDays: 3
   apiGateway:
     apiKeys:
-      - discord
+      - discord-${self:provider.stage}
     usagePlan:
       quota:
         limit: 1000
@@ -30,9 +30,10 @@ functions:
     timeout: 60
     role: setRoute53Role
     environment:
-      DOMAINNAME: ${env:DOMAINNAME}
-      HOSTEDZONEID: ${env:HOSTZONEID}
-      WEBHOOKURL: ${env:WEBHOOKURL}
+      DOMAIN_NAME: ${env:DOMAIN_NAME}
+      HOSTEDZONE_ID: ${env:HOSTEDZONE_ID}
+      WEBHOOK_URL: ${env:WEBHOOK_URL}
+      AVATAR_URL: ${env:AVATAR_URL}
     events:
       - cloudwatchEvent:
           event:
@@ -45,13 +46,13 @@ functions:
                 - running
                 - stopping
               instance-id:
-                - ${env:INSTANCEID}
+                - ${env:INSTANCE_ID}
   ec2Operator:
     handler: handler/ec2_operator.lambda_handler
     timeout: 30
     role: ec2OperatorRole
     environment:
-      INSTANCEID: ${env:INSTANCEID}
+      INSTANCE_ID: ${env:INSTANCE_ID}
     events:
       - http:
           path: api/discord

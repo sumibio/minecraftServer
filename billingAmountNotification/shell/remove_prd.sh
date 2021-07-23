@@ -1,15 +1,12 @@
 #!/bin/bash
 cd ../
-export STAGE="dev"
-export DOMAIN_NAME="dummy"
-export HOSTZONE_ID="dummy"
-export INSTANCE_ID="dummy"
+export STAGE="prd"
 export WEBHOOK_URL="dummy"
 export AVATAR_URL="dummy"
 
 read -p "アンデプロイを実施しますか？: " ANSWER
 
-case $ANSWER in "Yes" | "yes" | "Y"  | "y" )
+case $ANSWER in "Yes")
     serverless remove
     ;;
     * ) echo "アンデプロイは実施しません。"

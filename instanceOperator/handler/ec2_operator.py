@@ -5,7 +5,7 @@ import handler.operation_parameter as operation_parameter
 
 
 REGION = 'ap-northeast-1'
-INSTANCE_ID = os.environ.get('INSTANCEID')
+INSTANCE_ID = os.environ.get('INSTANCE_ID')
 
 
 def status_checker(describe_instances: dict) -> str:

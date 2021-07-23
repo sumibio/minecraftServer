@@ -2,14 +2,15 @@ import requests
 import json
 import os
 
-WEBHOOKURL = os.environ.get('WEBHOOKURL')
+WEBHOOK_URL = os.environ.get('WEBHOOK_URL')
+AVATAR_URL = os.environ.get('AVATAR_URL')
 
 
 def push_message(message: str):
-    webhook_url = WEBHOOKURL
+    webhook_url = WEBHOOK_URL
     main_content = {
         "username": "Amazon Web Services",
-        "avatar_url": "https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png",
+        "avatar_url": AVATAR_URL,
         "content": message,
     }
 
