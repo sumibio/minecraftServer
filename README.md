@@ -1,5 +1,9 @@
 # 概要
-マイクラ用サーバーで構築したコードを管理します。
+Minecraft用サーバーの構築で使用した一連のコードです。
+[Distcordbot](https://github.com/mizukamiyuta/minecraftDiscordbot)を使用したサーバー停止起動への対応が含まれます。
+
+## billingAmountNotification
+AWS使用料金をDiscordに通知するあプリケーション
 
 ## cloudFormationTemplate
 EC2サーバー用CFn
